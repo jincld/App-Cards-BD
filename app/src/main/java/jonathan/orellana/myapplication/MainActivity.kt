@@ -2,6 +2,7 @@ package jonathan.orellana.myapplication
 
 import RecyclerViewHelper.Adaptador
 import android.os.Bundle
+import android.widget.Adapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -90,6 +91,12 @@ class MainActivity : AppCompatActivity() {
                 addMascota.setInt(3, txtEdad.text.toString().toInt())
                 addMascota.executeUpdate()
                 println("saeadfasdfasdfasdfasdf")
+
+                //Refresca la tabla
+                val nuevasMascotas = obtenerDatos()
+                withContext(Dispatchers.Main){
+                    (rcvMascotas.adapter as? Adaptador)?.ActualizarLista(nuevasMascotas)
+                }
             }
         }
     }

@@ -13,6 +13,11 @@ import modelo.classMascotas
 
 class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<ViewHolder>() {
 
+    fun ActualizarLista(nuevaLista: List <classMascotas>){
+        Datos = nuevaLista
+        notifyDataSetChanged()//notifica al recycle que hay datos nuevos
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val vista =
             LayoutInflater.from(parent.context).inflate(R.layout.activity_item_card, parent, false)
