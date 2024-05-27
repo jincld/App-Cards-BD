@@ -3,6 +3,7 @@ package RecyclerViewHelper
 import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import jonathan.orellana.myapplication.R
 import kotlinx.coroutines.Dispatchers
@@ -10,18 +11,25 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import modelo.claseConexion
-import modelo.classMascotas
+import modelo.dataClassMascotas
 
 
-class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<ViewHolder>() {
 
-    fun ActualizarLista(nuevaLista: List <classMascotas> ){
+class Adaptador(private var Datos: List<dataClassMascotas>) : RecyclerView.Adapter<ViewHolder>() {
+
+    fun ActualizarLista(nuevaLista: List<dataClassMascotas>) {
         Datos = nuevaLista
         notifyDataSetChanged()//notifica al recycle que hay datos nuevos
     }
 
+    fun actualizarPantalla(uuid: String, nuevoNombre: String){
+        val index = Datos.indexOfFirst { it.uuid == uuid }
+        Datos[index].nombreMascota = nuevoNombre
+        notifyDataSetChanged()
+    }
+
     //////// TODO: Eliminar datos
-    fun eliminarDatos(nombreMascota: String, posicion: Int){
+    fun eliminarDatos(nombreMascota: String, posicion: Int) {
 
         //Actualizar lista de datos y notificar al adaptador
         val listaDatos = Datos.toMutableList()
@@ -32,7 +40,8 @@ class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<V
             val objConexion = claseConexion().cadenaConexion()
 
             //crear variable con prepare statement
-            val deleteMascota =objConexion?.prepareStatement("delete from tbMascotas where nombreMascota = ?")!!
+            val deleteMascota =
+                objConexion?.prepareStatement("delete from tbMascotas where nombreMascota = ?")!!
             deleteMascota.setString(1, nombreMascota)
             deleteMascota.executeUpdate()
 
@@ -43,6 +52,22 @@ class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<V
         Datos = listaDatos.toList()
         notifyItemRemoved(posicion)
         notifyDataSetChanged()
+
+    }
+
+    ////////TODO: EDITAR DATOS
+    fun updateMascota(nuevoNombre: String, uuid: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            //crear objeto de clase conexion
+            val objConexion = claseConexion().cadenaConexion()
+
+            //crear variable con prepare statement
+            val updateMascota =
+                objConexion?.prepareStatement("update tbMascotas set nombreMascota = ? where uuid = ?")!!
+            updateMascota.setString(1, nuevoNombre)
+            updateMascota.setString(2, uuid)
+            updateMascota.executeUpdate()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -88,10 +113,15 @@ class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<V
             builder.setTitle("Editar")
             builder.setMessage("¿Desea editar la mascota?")
 
+            //Cuadro de texto
+            val cuadroTexto = EditText(context)
+            cuadroTexto.setHint(mascota.nombreMascota)
+            builder.setView(cuadroTexto)
+
             //Botones
 
             builder.setPositiveButton("si") { dialog, which ->
-
+                updateMascota(cuadroTexto.text.toString(), mascota.uuid)
             }
 
             builder.setNegativeButton("No") { dialog, which ->
@@ -101,6 +131,8 @@ class Adaptador(private var Datos: List<classMascotas>) : RecyclerView.Adapter<V
             val dialog = builder.create()
             dialog.show()
         }
+
+
 
     }
 }

@@ -18,7 +18,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import modelo.claseConexion
-import modelo.classMascotas
+import modelo.dataClassMascotas
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         //TODO: MOSTRAR DATOS//
         //función para mostrar datos
 
-        fun obtenerDatos(): List<classMascotas>{
+        fun obtenerDatos(): List<dataClassMascotas>{
 
             //crear objeto conexion
 
@@ -54,13 +55,17 @@ class MainActivity : AppCompatActivity() {
 
             val statement = objConexion?.createStatement()
             val resulSet = statement?.executeQuery("select * from tbMascotas")!!
-            val mascotas = mutableListOf<classMascotas>()
+            val mascotas = mutableListOf<dataClassMascotas>()
 
             //recorro todos los registos de la base de datos
 
             while(resulSet.next()){
-                val nombre = resulSet.getString("nombreMascota")
-                val mascota = classMascotas(nombre)
+                val nombreMascota = resulSet.getString("nombreMascota")
+                val uuid = resulSet.getString("uuid")
+                val peso = resulSet.getInt("peso")
+                val edad = resulSet.getInt("edad")
+
+                val mascota = dataClassMascotas(uuid, nombreMascota, peso, edad)
                 mascotas.add(mascota)
             }
 
@@ -85,10 +90,11 @@ class MainActivity : AppCompatActivity() {
                 val objConexion = claseConexion().cadenaConexion()
 
                 //Crear variable que contenga PrepareStatement
-                val addMascota = objConexion?.prepareStatement("insert into tbMascotas values (?, ?, ?)")!!
-                addMascota.setString(1,txtNombre.text.toString())
-                addMascota.setInt(2, txtPeso.text.toString().toInt())
-                addMascota.setInt(3, txtEdad.text.toString().toInt())
+                val addMascota = objConexion?.prepareStatement("insert into tbMascotas(uuid, nombreMascota, peso, edad) values (?, ?, ?, ?)")!!
+                addMascota.setString(1, UUID.randomUUID().toString())
+                addMascota.setString(2,txtNombre.text.toString())
+                addMascota.setInt(3, txtPeso.text.toString().toInt())
+                addMascota.setInt(4, txtEdad.text.toString().toInt())
                 addMascota.executeUpdate()
                 println("saeadfasdfasdfasdfasdf")
 
