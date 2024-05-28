@@ -1,11 +1,13 @@
 package RecyclerViewHelper
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import jonathan.orellana.myapplication.R
+import jonathan.orellana.myapplication.detalle_mascota
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -67,6 +69,10 @@ class Adaptador(private var Datos: List<dataClassMascotas>) : RecyclerView.Adapt
             updateMascota.setString(1, nuevoNombre)
             updateMascota.setString(2, uuid)
             updateMascota.executeUpdate()
+
+            withContext(Dispatchers.Main){
+                actualizarPantalla(uuid, nuevoNombre)
+            }
         }
     }
 
@@ -132,7 +138,20 @@ class Adaptador(private var Datos: List<dataClassMascotas>) : RecyclerView.Adapt
             dialog.show()
         }
 
+        //TODO: CLICK A LA CARD PARA MOSTRAR DETALLE
+        holder.itemView.setOnClickListener {
 
+            val context = holder.itemView.context
+
+            //cambiar a pantalla de detalle
+            val pantallaDetalle = Intent(context, detalle_mascota :: class.java)
+            //enviar valores a la otra pantalla
+            pantallaDetalle.putExtra("MascotaUUID", mascota.uuid)
+            pantallaDetalle.putExtra("NombreMascota", mascota.nombreMascota)
+            pantallaDetalle.putExtra("Edad", mascota.edad)
+            pantallaDetalle.putExtra("Peso", mascota.peso)
+            context.startActivity(pantallaDetalle)
+        }
 
     }
 }
